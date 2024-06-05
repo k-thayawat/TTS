@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import torch
 from TTS.api import TTS
+from pydub import AudioSegment
 
+    return altered_sound.set_frame_rate(sound.frame_rate)
 # Get device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -11,4 +13,22 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # Init TTS
 tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
 
-tts.tts_to_file(text="夢ならばどれほどよかったでしょう、未だにあなたのことを夢にみる、忘れた物を取りに帰るように、古びた思い出の埃を払う、戻らない幸せがあることを最後にあなたが教えてくれた、言えずに隠してた昏い過去も、あなたがいなきゃ永遠に昏いまま", speaker_wav="sources/ahri_1m.mp3", language="ja", file_path="outputs/output.wav")
+source = "sources/{file_name}"
+inputs = [
+    [1,'en', ""],
+    [2,'ja', ""],
+]
+
+for input in inputs:
+    tts.tts_to_file(text=input[2], speaker_wav=source, language=input[1], file_path=f"outputs/output_{input[0]}.wav")
+
+final_audio = AudioSegment.silent()
+
+for count in range(len(inputs)):
+
+    count +=1
+    cur_clip = AudioSegment.from_wav(f'outputs/output_{count}.wav')
+
+    final_audio = final_audio + cur_clip  
+
+final_audio.export(f'outputs/output_final.wav', format="wav")
